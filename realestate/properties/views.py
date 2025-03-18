@@ -152,11 +152,11 @@ def chatbot_query(request):
         properties = Property.objects.filter(filters).values("id", "title", "location", "price", "bedrooms", "bathrooms")
         property_list = list(properties)
 
-        # **Strictly handle no matching properties**
+        
         if matched_city and not property_list:
             return Response({"response": f"No properties found in {matched_city} based on your criteria."})
 
-        # **Use Search History for Recommendations (if needed)**
+        
         if not property_list and user:
             past_searches = UserSearchHistory.objects.filter(user=user).order_by("-timestamp")[:3]
             if past_searches.exists():
@@ -170,7 +170,7 @@ def chatbot_query(request):
         if not property_list:
             return Response({"response": "No matching properties found based on your preferences."})
 
-        # Format response with booking instructions
+        
         property_info = "\n\n".join([
             f"🏠 {prop['title']} (ID: {prop['id']}): {prop['bedrooms']} beds, {prop['bathrooms']} baths, ${prop['price']} in {prop['location']}."
             f"\n👉 Type 'Book visit {prop['id']} on YYYY-MM-DD at HH:MM AM/PM' to schedule a visit."
@@ -199,13 +199,13 @@ def handle_booking(user, property_id, visit_date, visit_time):
     if not user:
         return {"error": "You must be logged in to book a visit."}
 
-    # Validate Property
+    
     try:
         property_obj = Property.objects.get(id=property_id, is_available=True)
     except Property.DoesNotExist:
         return {"error": "Property not available"}
 
-    # Check Availability
+    
     if Booking.objects.filter(property=property_obj, visit_date=visit_date, visit_time=visit_time).exists():
         return {"error": "This slot is already booked"}
 
